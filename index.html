@@ -42,8 +42,9 @@
     box-shadow: 0 6px 0 -2px rgba(22,33,92,0.15); padding: 10px;
   }
   .stamp span{
-    font-family:'Space Mono', monospace; font-size: 10px;
-    letter-spacing: 0.12em; text-transform: uppercase; line-height:1.5;
+    font-family:'Space Mono', monospace; font-size: 9px;
+    letter-spacing: 0.1em; text-transform: uppercase; line-height:1.55;
+    word-break: break-word;
   }
 
   header{ text-align:center; margin-bottom: 22px; }
@@ -174,7 +175,7 @@
 
 <div class="sleeve">
 
-  <div class="stamp"><span>Song<br>Lens<br>Live</span></div>
+  <div class="stamp" id="stampBox"><span id="stampText">Cue<br>Up<br>A<br>Song</span></div>
 
   <header>
     <h1>Song Interpretations<br>and Recommendations</h1>
@@ -191,8 +192,6 @@
   <div id="results">
     <div class="state-box">Cue up a song above to get started.</div>
   </div>
-
-  <footer>One song at a time. Every search replaces the last.</footer>
 
 </div>
 
@@ -234,8 +233,12 @@ async function analyzeSong(){
     const data = await res.json();
 
     if (!res.ok || data.error){
+      let msg = data.error || ('Something went wrong (' + res.status + ').');
+      if (data.debug){
+        msg += '<br><br><span style="opacity:0.7">DEBUG (' + (data.stop_reason || 'no stop_reason') + '): ' + escapeHtml(data.debug) + '</span>';
+      }
       document.getElementById('results').innerHTML =
-        '<div class="state-box error">' + escapeHtml(data.error || ('Something went wrong (' + res.status + ').')) + '</div>';
+        '<div class="state-box error">' + msg + '</div>';
       return;
     }
 
@@ -253,6 +256,9 @@ async function analyzeSong(){
 }
 
 function renderResult(d){
+  const stampLines = [d.song, d.artist, d.album].filter(Boolean);
+  document.getElementById('stampText').innerHTML = stampLines.map(escapeHtml).join('<br>');
+
   const meta = [d.album, d.year].filter(Boolean).join(' · ');
   const recs = (d.recommendations || []).map((r, i) => `
     <div class="rec">
