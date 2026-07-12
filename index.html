@@ -208,26 +208,16 @@ function escapeHtml(str){
   return d.innerHTML;
 }
 
-// Free, keyless lookup against Apple's iTunes catalog to get real album art.
-// Falls back silently to the text stamp if nothing is found.
-async function setStampArt(song, artist){
+// Applies the album art the Worker already looked up server-side.
+// Falls back to the text stamp if none was found.
+function setStampArt(artworkUrl){
   const stampBox = document.getElementById('stampBox');
   stampBox.classList.remove('has-art');
   stampBox.style.backgroundImage = '';
 
-  try{
-    const term = encodeURIComponent(`${artist} ${song}`);
-    const res = await fetch(`https://itunes.apple.com/search?term=${term}&media=music&entity=song&limit=1`);
-    if (!res.ok) return;
-    const data = await res.json();
-    const art = data.results && data.results[0] && data.results[0].artworkUrl100;
-    if (!art) return;
-    const hiRes = art.replace('100x100', '600x600');
-    stampBox.style.backgroundImage = `url("${hiRes}")`;
-    stampBox.classList.add('has-art');
-  } catch {
-    // Silent fallback — the text stamp stays visible.
-  }
+  if (!artworkUrl) return;
+  stampBox.style.backgroundImage = `url("${artworkUrl}")`;
+  stampBox.classList.add('has-art');
 }
 
 async function analyzeSong(){
@@ -297,7 +287,7 @@ async function analyzeSong(){
 function renderResult(d){
   const stampLines = [d.song, d.artist, d.album].filter(Boolean);
   document.getElementById('stampText').innerHTML = stampLines.map(escapeHtml).join('<br>');
-  setStampArt(d.song, d.artist);
+  setStampArt(d.artwork_url);
 
   const meta = [d.album, d.year].filter(Boolean).join(' · ');
   const recs = (d.recommendations || []).map((r, i) => `
