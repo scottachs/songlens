@@ -223,14 +223,25 @@ async function analyzeSong(){
   btn.textContent = 'Spinning...';
   document.getElementById('results').innerHTML = '<div class="state-box">Dropping the needle — researching and writing this one up...</div>';
 
-  try{
+  const attempt = async () => {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query })
     });
-
     const data = await res.json();
+    return { res, data };
+  };
+
+  try{
+    let res, data;
+    try {
+      ({ res, data } = await attempt());
+    } catch (firstErr) {
+      // Transient network hiccups happen with slower searches — retry once, silently.
+      document.getElementById('results').innerHTML = '<div class="state-box">Still working on it — trying once more...</div>';
+      ({ res, data } = await attempt());
+    }
 
     if (!res.ok || data.error){
       let msg = data.error || ('Something went wrong (' + res.status + ').');
