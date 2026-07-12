@@ -40,7 +40,10 @@
     margin: 0 auto 22px; display:flex; align-items:center; justify-content:center;
     text-align:center; transform: rotate(-6deg);
     box-shadow: 0 6px 0 -2px rgba(22,33,92,0.15); padding: 10px;
+    background-size: cover; background-position: center; overflow: hidden;
   }
+  .stamp.has-art{ padding: 0; }
+  .stamp.has-art span{ display:none; }
   .stamp span{
     font-family:'Space Mono', monospace; font-size: 9px;
     letter-spacing: 0.1em; text-transform: uppercase; line-height:1.55;
@@ -205,6 +208,28 @@ function escapeHtml(str){
   return d.innerHTML;
 }
 
+// Free, keyless lookup against Apple's iTunes catalog to get real album art.
+// Falls back silently to the text stamp if nothing is found.
+async function setStampArt(song, artist){
+  const stampBox = document.getElementById('stampBox');
+  stampBox.classList.remove('has-art');
+  stampBox.style.backgroundImage = '';
+
+  try{
+    const term = encodeURIComponent(`${artist} ${song}`);
+    const res = await fetch(`https://itunes.apple.com/search?term=${term}&media=music&entity=song&limit=1`);
+    if (!res.ok) return;
+    const data = await res.json();
+    const art = data.results && data.results[0] && data.results[0].artworkUrl100;
+    if (!art) return;
+    const hiRes = art.replace('100x100', '600x600');
+    stampBox.style.backgroundImage = `url("${hiRes}")`;
+    stampBox.classList.add('has-art');
+  } catch {
+    // Silent fallback — the text stamp stays visible.
+  }
+}
+
 async function analyzeSong(){
   const query = document.getElementById('cueInput').value.trim();
   const statusEl = document.getElementById('cueStatus');
@@ -221,6 +246,9 @@ async function analyzeSong(){
 
   btn.disabled = true;
   btn.textContent = 'Spinning...';
+  document.getElementById('stampBox').classList.remove('has-art');
+  document.getElementById('stampBox').style.backgroundImage = '';
+  document.getElementById('stampText').innerHTML = 'Cue<br>Up<br>A<br>Song';
   document.getElementById('results').innerHTML = '<div class="state-box">Dropping the needle — researching and writing this one up...</div>';
 
   const attempt = async () => {
@@ -269,6 +297,7 @@ async function analyzeSong(){
 function renderResult(d){
   const stampLines = [d.song, d.artist, d.album].filter(Boolean);
   document.getElementById('stampText').innerHTML = stampLines.map(escapeHtml).join('<br>');
+  setStampArt(d.song, d.artist);
 
   const meta = [d.album, d.year].filter(Boolean).join(' · ');
   const recs = (d.recommendations || []).map((r, i) => `
