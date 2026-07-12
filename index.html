@@ -15,6 +15,7 @@
     --ink-bright: #3247d1;
     --line: #d67aa8;
     --line-soft: #e6a9c6;
+    --err: #a3123a;
   }
   *{ box-sizing:border-box; }
   html,body{ margin:0; padding:0; }
@@ -31,66 +32,35 @@
     padding: 48px 18px 80px;
   }
 
-  .sleeve{
-    width:100%;
-    max-width: 620px;
-  }
+  .sleeve{ width:100%; max-width: 620px; }
 
-  /* ---- Header / label stamp ---- */
   .stamp{
-    width: 128px;
-    height: 128px;
-    border-radius:50%;
-    border: 3px solid var(--ink);
-    background: var(--cream);
-    margin: 0 auto 22px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    transform: rotate(-6deg);
-    box-shadow: 0 6px 0 -2px rgba(22,33,92,0.15);
-    padding: 10px;
+    width: 128px; height: 128px; border-radius:50%;
+    border: 3px solid var(--ink); background: var(--cream);
+    margin: 0 auto 22px; display:flex; align-items:center; justify-content:center;
+    text-align:center; transform: rotate(-6deg);
+    box-shadow: 0 6px 0 -2px rgba(22,33,92,0.15); padding: 10px;
   }
   .stamp span{
-    font-family:'Space Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    line-height:1.5;
+    font-family:'Space Mono', monospace; font-size: 10px;
+    letter-spacing: 0.12em; text-transform: uppercase; line-height:1.5;
   }
 
-  header{ text-align:center; margin-bottom: 30px; }
+  header{ text-align:center; margin-bottom: 22px; }
   h1{
-    font-family:'Instrument Serif', serif;
-    font-style: italic;
-    font-weight: 400;
-    font-size: 44px;
-    line-height:1.05;
-    margin: 0 0 8px;
-    color: var(--ink);
-  }
-  .tagline{
-    font-family:'Space Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink-bright);
-    margin:0;
+    font-family:'Instrument Serif', serif; font-style: italic; font-weight: 400;
+    font-size: 44px; line-height:1.05; margin: 0; color: var(--ink);
   }
 
-  /* ---- Cue box (non-functional by design, see note) ---- */
+  /* ---- Cue box ---- */
   .cue{
     background: var(--pink-panel);
     border: 2px solid var(--ink);
     border-radius: 14px;
     padding: 16px;
-    margin: 30px 0 34px;
+    margin: 30px 0;
   }
-  .cue-row{
-    display:flex;
-    gap:10px;
-  }
+  .cue-row{ display:flex; gap:10px; }
   .cue input{
     flex:1;
     font-family:'Work Sans', sans-serif;
@@ -117,131 +87,79 @@
     cursor: pointer;
   }
   .cue button:hover{ background: var(--ink-bright); }
-  .cue-note{
-    font-family:'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--ink);
-    opacity: 0.75;
-    margin: 10px 2px 0;
-    line-height:1.5;
-  }
-
-  /* ---- Now playing ---- */
-  .now-playing{
-    text-align:center;
-    margin-bottom: 8px;
-  }
-  .now-playing .eyebrow{
-    font-family:'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ink-bright);
-    margin: 0 0 4px;
-  }
-  .now-playing .title{
-    font-family:'Instrument Serif', serif;
-    font-style: italic;
-    font-size: 30px;
-    margin: 0;
-  }
-  .now-playing .artist{
-    font-family:'Work Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 500;
-    margin: 2px 0 0;
-  }
-  .now-playing .album{
+  .cue button:disabled{ opacity: 0.6; cursor: default; }
+  .cue-status{
     font-family:'Space Mono', monospace;
     font-size: 12px;
     color: var(--ink);
-    opacity: 0.65;
-    margin: 4px 0 0;
-    letter-spacing: 0.02em;
+    margin: 10px 2px 0;
+  }
+  .cue-status.error{ color: var(--err); }
+
+  /* ---- Now playing ---- */
+  .now-playing{ text-align:center; margin-bottom: 8px; }
+  .now-playing .eyebrow{
+    font-family:'Space Mono', monospace;
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-bright); margin: 0 0 4px;
+  }
+  .now-playing .title{
+    font-family:'Instrument Serif', serif; font-style: italic; font-size: 30px; margin: 0;
+  }
+  .now-playing .artist{
+    font-family:'Work Sans', sans-serif; font-size: 15px; font-weight: 500; margin: 2px 0 0;
+  }
+  .now-playing .album{
+    font-family:'Space Mono', monospace; font-size: 12px; color: var(--ink);
+    opacity: 0.65; margin: 4px 0 0; letter-spacing: 0.02em;
   }
 
   /* ---- Card / liner notes ---- */
   .liner{
-    background: var(--cream);
-    border: 2px solid var(--ink);
-    border-radius: 18px;
-    padding: 8px 30px 26px;
-    margin-top: 26px;
+    background: var(--cream); border: 2px solid var(--ink); border-radius: 18px;
+    padding: 8px 30px 26px; margin-top: 26px;
   }
-
-  .track{
-    padding: 22px 0;
-    border-bottom: 1px dashed var(--line);
-  }
+  .track{ padding: 22px 0; border-bottom: 1px dashed var(--line); }
   .track:last-child{ border-bottom: none; }
-
-  .track-head{
-    display:flex;
-    align-items: baseline;
-    gap: 12px;
-    margin-bottom: 8px;
-  }
+  .track-head{ display:flex; align-items: baseline; gap: 12px; margin-bottom: 8px; }
   .track-num{
-    font-family:'Space Mono', monospace;
-    font-size: 13px;
-    font-weight:700;
-    color: var(--ink-bright);
-    min-width: 26px;
+    font-family:'Space Mono', monospace; font-size: 13px; font-weight:700;
+    color: var(--ink-bright); min-width: 26px;
   }
-  .track-title{
-    font-family:'Instrument Serif', serif;
-    font-style: italic;
-    font-size: 23px;
-    margin:0;
-  }
-  .track p{
-    margin: 0;
-    font-size: 15.5px;
-    line-height: 1.62;
-    padding-left: 38px;
-  }
+  .track-title{ font-family:'Instrument Serif', serif; font-style: italic; font-size: 23px; margin:0; }
+  .track p{ margin: 0; font-size: 15.5px; line-height: 1.62; padding-left: 38px; }
 
   /* ---- B-side recs ---- */
   .bside{
-    margin-top: 30px;
-    background: var(--pink-panel);
-    border: 2px solid var(--ink);
-    border-radius: 18px;
-    padding: 24px 26px 8px;
+    margin-top: 30px; background: var(--pink-panel); border: 2px solid var(--ink);
+    border-radius: 18px; padding: 24px 26px 8px;
   }
   .bside-head{
-    font-family:'Space Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--ink);
-    margin: 0 0 14px;
+    font-family:'Space Mono', monospace; font-size: 12px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--ink); margin: 0 0 14px;
   }
-  .rec{
-    display:flex;
-    gap: 12px;
-    padding: 14px 0;
-    border-bottom: 1px dashed var(--line-soft);
-  }
+  .rec{ display:flex; gap: 12px; padding: 14px 0; border-bottom: 1px dashed var(--line-soft); }
   .rec:last-child{ border-bottom: none; }
   .rec-num{
-    font-family:'Space Mono', monospace;
-    font-size: 13px;
-    color: var(--ink-bright);
-    font-weight:700;
-    min-width: 20px;
+    font-family:'Space Mono', monospace; font-size: 13px; color: var(--ink-bright);
+    font-weight:700; min-width: 20px;
   }
   .rec-body b{ font-family:'Work Sans', sans-serif; font-weight:600; }
   .rec-body p{ margin: 4px 0 0; font-size: 14.5px; line-height:1.55; }
 
-  footer{
+  /* ---- Loading / error states ---- */
+  .state-box{
     text-align:center;
-    margin-top: 34px;
+    padding: 40px 20px;
     font-family:'Space Mono', monospace;
-    font-size: 11px;
+    font-size: 13px;
     color: var(--ink);
-    opacity: 0.7;
-    letter-spacing: 0.04em;
+  }
+  .state-box.error{ color: var(--err); }
+
+  footer{
+    text-align:center; margin-top: 34px; font-family:'Space Mono', monospace;
+    font-size: 11px; color: var(--ink); opacity: 0.7; letter-spacing: 0.04em;
   }
 
   @media (max-width: 480px){
@@ -256,103 +174,134 @@
 
 <div class="sleeve">
 
-  <div class="stamp"><span>The<br>Meadowlands<br>2003</span></div>
+  <div class="stamp"><span>Song<br>Lens<br>Live</span></div>
 
   <header>
     <h1>Song Interpretations<br>and Recommendations</h1>
-
   </header>
 
   <div class="cue">
     <div class="cue-row">
-      <input type="text" id="cueInput" placeholder="Song — Artist">
-      <button onclick="document.getElementById('nowPlaying').scrollIntoView({behavior:'smooth'})">Cue Up</button>
+      <input type="text" id="cueInput" placeholder="Song — Artist" onkeydown="if(event.key==='Enter')analyzeSong()">
+      <button id="cueBtn" onclick="analyzeSong()">Cue Up</button>
     </div>
+    <p class="cue-status" id="cueStatus"></p>
   </div>
 
-  <div class="now-playing" id="nowPlaying">
-    <p class="eyebrow">Now Playing</p>
-    <h2 class="title">She Sends Kisses</h2>
-    <p class="artist">The Wrens</p>
-    <p class="album">The Meadowlands · 2003</p>
+  <div id="results">
+    <div class="state-box">Cue up a song above to get started.</div>
   </div>
 
-  <div class="liner">
-
-    <div class="track">
-      <div class="track-head">
-        <span class="track-num">01</span>
-        <h3 class="track-title">The Setup</h3>
-      </div>
-      <p>Guy's home alone, high, spinning his ex's old records because it's the closest thing he's got to having her back in the room. Her name is Beth. She's moved on — new town, new guy — but every so often she still mails him a letter, the kind stamped with hearts on the outside that gut him on the inside. He answers back. He shouldn't, but he does.</p>
-    </div>
-
-    <div class="track">
-      <div class="track-head">
-        <span class="track-num">02</span>
-        <h3 class="track-title">The Characters</h3>
-      </div>
-      <p>The narrator: the guy who never actually left the breakup, even though the breakup very clearly left him. Beth: the ex who's moved forward but keeps sending kisses back to the guy she left behind — guilt, boredom, or genuine leftover affection, take your pick. And then there's a girl he's currently seeing, a college sophomore, who he can't stop mentally overlaying Beth's face onto. She's not really a person to him. She's a stand-in.</p>
-    </div>
-
-    <div class="track">
-      <div class="track-head">
-        <span class="track-num">03</span>
-        <h3 class="track-title">The Moral/Ethical Tension</h3>
-      </div>
-      <p>Nobody here is innocent, and it's genuinely hard to say who's worse. Is Beth cruel for keeping the door cracked with kisses and inside jokes when she's already got a new life? Or is she just being decent, and he's the one turning warmth into a wound? Meanwhile he's using an actual, present person as a body double for someone who left him — its own quiet betrayal that never gets sung about, because she's not the one telling this story. Everybody's stringing somebody along, including the narrator stringing himself along.</p>
-    </div>
-
-    <div class="track">
-      <div class="track-head">
-        <span class="track-num">04</span>
-        <h3 class="track-title">The Psychology</h3>
-      </div>
-      <p>This guy is running on nostalgia and self-pity and he half-knows it — numbing out while replaying the same records, which is the emotional version of picking a scab so it can't heal. His blind spot shows up right at the end: he calls himself "corrupt," tosses off a sarcastic "good luck," and wants you to think that's him being over it. It's not. That line only exists because he's furious she's fine without him. That's not indifference — that's ego management dressed up as detachment.</p>
-    </div>
-
-    <div class="track">
-      <div class="track-head">
-        <span class="track-num">05</span>
-        <h3 class="track-title">Why It Hits</h3>
-      </div>
-      <p>Because there's no clean ending. No closure, no getting the girl, not even the satisfaction of feeling morally superior — he just fires off one more bitter line and the song cuts out mid-obsession. Anyone who's ever reread an ex's old texts, or answered a "just checking in" they should've ignored, knows this exact feeling. It's not a sad breakup song. It's a stuck breakup song, and a guy lying to himself about which one he's in.</p>
-    </div>
-
-  </div>
-
-  <div class="bside">
-    <p class="bside-head">B-Side — Recommended Next Spins</p>
-
-    <div class="rec">
-      <span class="rec-num">1</span>
-      <div class="rec-body">
-        <b>Somebody That I Used to Know — Gotye</b>
-        <p>Same one-sided bitterness: one person's clearly moved on, the other's narrating the whole thing from inside the wound.</p>
-      </div>
-    </div>
-
-    <div class="rec">
-      <span class="rec-num">2</span>
-      <div class="rec-body">
-        <b>Video Games — Lana Del Rey</b>
-        <p>Same trap of loving the idealized replay of someone more than they ever deserved in real time.</p>
-      </div>
-    </div>
-
-    <div class="rec">
-      <span class="rec-num">3</span>
-      <div class="rec-body">
-        <b>Ivy — Frank Ocean</b>
-        <p>Same drugged, nostalgic haze around a love that's gone, and the same refusal to just say "I'm not over this" out loud.</p>
-      </div>
-    </div>
-
-  </div>
-
-  <footer>Side A of one. Ask for the next track whenever.</footer>
+  <footer>One song at a time. Every search replaces the last.</footer>
 
 </div>
+
+<script>
+// Point this at your deployed Cloudflare Worker URL.
+const WORKER_URL = "https://songlens.scottachs-cloudfare.workers.dev";
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+async function analyzeSong(){
+  const query = document.getElementById('cueInput').value.trim();
+  const statusEl = document.getElementById('cueStatus');
+  const btn = document.getElementById('cueBtn');
+
+  statusEl.className = 'cue-status';
+  statusEl.textContent = '';
+
+  if (!query){
+    statusEl.className = 'cue-status error';
+    statusEl.textContent = 'Type a song title (and artist, if you can).';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Spinning...';
+  document.getElementById('results').innerHTML = '<div class="state-box">Dropping the needle — researching and writing this one up...</div>';
+
+  try{
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || data.error){
+      document.getElementById('results').innerHTML =
+        '<div class="state-box error">' + escapeHtml(data.error || ('Something went wrong (' + res.status + ').')) + '</div>';
+      return;
+    }
+
+    renderResult(data);
+    const anchor = document.getElementById('nowPlayingAnchor');
+    if (anchor) anchor.scrollIntoView({ behavior: 'smooth' });
+
+  } catch(e){
+    document.getElementById('results').innerHTML =
+      '<div class="state-box error">Could not reach the analysis tool. Try again in a moment.</div>';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Cue Up';
+  }
+}
+
+function renderResult(d){
+  const meta = [d.album, d.year].filter(Boolean).join(' · ');
+  const recs = (d.recommendations || []).map((r, i) => `
+    <div class="rec">
+      <span class="rec-num">${i+1}</span>
+      <div class="rec-body">
+        <b>${escapeHtml(r.title)} — ${escapeHtml(r.artist)}</b>
+        <p>${escapeHtml(r.reason)}</p>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('results').innerHTML = `
+    <div class="now-playing" id="nowPlayingAnchor">
+      <p class="eyebrow">Now Playing</p>
+      <h2 class="title">${escapeHtml(d.song)}</h2>
+      <p class="artist">${escapeHtml(d.artist)}</p>
+      ${meta ? `<p class="album">${escapeHtml(meta)}</p>` : ''}
+    </div>
+
+    <div class="liner">
+      <div class="track">
+        <div class="track-head"><span class="track-num">01</span><h3 class="track-title">The Setup</h3></div>
+        <p>${escapeHtml(d.setup)}</p>
+      </div>
+      <div class="track">
+        <div class="track-head"><span class="track-num">02</span><h3 class="track-title">The Characters</h3></div>
+        <p>${escapeHtml(d.characters)}</p>
+      </div>
+      <div class="track">
+        <div class="track-head"><span class="track-num">03</span><h3 class="track-title">The Moral/Ethical Tension</h3></div>
+        <p>${escapeHtml(d.moral_tension)}</p>
+      </div>
+      <div class="track">
+        <div class="track-head"><span class="track-num">04</span><h3 class="track-title">The Psychology</h3></div>
+        <p>${escapeHtml(d.psychology)}</p>
+      </div>
+      <div class="track">
+        <div class="track-head"><span class="track-num">05</span><h3 class="track-title">Why It Hits</h3></div>
+        <p>${escapeHtml(d.why_it_hits)}</p>
+      </div>
+    </div>
+
+    <div class="bside">
+      <p class="bside-head">B-Side — Recommended Next Spins</p>
+      ${recs}
+    </div>
+  `;
+}
+</script>
 
 </body>
 </html>
