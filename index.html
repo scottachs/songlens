@@ -158,6 +158,38 @@
   }
   .state-box.error{ color: var(--err); }
 
+  /* ---- Archive ---- */
+  .archive-bar{ text-align:center; margin: -14px 0 0; }
+  .archive-link{
+    font-family:'Space Mono', monospace; font-size: 12px; letter-spacing: 0.06em;
+    text-transform: uppercase; background: none; border: none; cursor: pointer;
+    color: var(--ink-bright); padding: 4px 6px; text-decoration: underline;
+  }
+  .archive-link:hover{ color: var(--ink); }
+  .archive-panel{
+    margin-top: 18px; background: var(--cream); border: 2px solid var(--ink);
+    border-radius: 18px; padding: 18px 22px 22px;
+  }
+  .archive-filter{
+    width: 100%; font-family:'Work Sans', sans-serif; font-size: 14px;
+    padding: 9px 12px; border-radius: 8px; border: 2px solid var(--ink);
+    background: var(--pink-panel); color: var(--ink); outline: none; margin-bottom: 6px;
+  }
+  .archive-filter::placeholder{ color: #8a7590; }
+  .archive-item{
+    width: 100%; text-align: left; background: none; border: none; cursor: pointer;
+    padding: 12px 4px; border-bottom: 1px dashed var(--line);
+    display: flex; align-items: baseline; gap: 8px;
+  }
+  .archive-item:last-child{ border-bottom: none; }
+  .archive-item:hover .archive-song{ color: var(--ink-bright); }
+  .archive-song{ font-family:'Instrument Serif', serif; font-style: italic; font-size: 18px; color: var(--ink); }
+  .archive-artist{ font-family:'Work Sans', sans-serif; font-size: 13px; color: var(--ink); opacity: 0.7; }
+  .archive-empty{
+    font-family:'Space Mono', monospace; font-size: 12px; color: var(--ink);
+    opacity: 0.7; text-align:center; padding: 20px 0;
+  }
+
   footer{
     text-align:center; margin-top: 34px; font-family:'Space Mono', monospace;
     font-size: 11px; color: var(--ink); opacity: 0.7; letter-spacing: 0.04em;
@@ -189,6 +221,15 @@
     <p class="cue-status" id="cueStatus"></p>
   </div>
 
+  <div class="archive-bar">
+    <button id="browseToggle" class="archive-link" onclick="toggleArchive()">Browse the archive →</button>
+  </div>
+
+  <div id="archivePanel" class="archive-panel" style="display:none;">
+    <input type="text" id="archiveFilter" class="archive-filter" placeholder="Filter by song or artist..." oninput="renderArchiveList()">
+    <div id="archiveList"></div>
+  </div>
+
   <div id="results">
     <div class="state-box">Cue up a song above to get started.</div>
   </div>
@@ -203,6 +244,71 @@ function escapeHtml(str){
   const d = document.createElement('div');
   d.textContent = str;
   return d.innerHTML;
+}
+
+// ---- Archive of previously-analyzed songs ----
+// Fetched once from the Worker's public browse endpoint. Clicking a song
+// re-renders its stored analysis instantly — no new API call, no cost.
+let archiveData = null;
+
+function toggleArchive(){
+  const panel = document.getElementById('archivePanel');
+  const toggle = document.getElementById('browseToggle');
+  if (panel.style.display === 'none'){
+    panel.style.display = 'block';
+    toggle.textContent = 'Hide the archive ×';
+    if (archiveData === null) loadArchive();
+  } else {
+    panel.style.display = 'none';
+    toggle.textContent = 'Browse the archive →';
+  }
+}
+
+async function loadArchive(){
+  const list = document.getElementById('archiveList');
+  list.innerHTML = '<p class="archive-empty">Loading the archive...</p>';
+  try{
+    const res = await fetch(WORKER_URL + '?browse=1');
+    const data = await res.json();
+    archiveData = (data && data.songs) ? data.songs : [];
+    renderArchiveList();
+  } catch(e){
+    list.innerHTML = '<p class="archive-empty">Could not load the archive right now.</p>';
+  }
+}
+
+function renderArchiveList(){
+  const list = document.getElementById('archiveList');
+  if (!archiveData) return;
+
+  const term = document.getElementById('archiveFilter').value.trim().toLowerCase();
+  const filtered = term
+    ? archiveData.filter(s =>
+        (s.song || '').toLowerCase().includes(term) ||
+        (s.artist || '').toLowerCase().includes(term))
+    : archiveData;
+
+  if (filtered.length === 0){
+    list.innerHTML = '<p class="archive-empty">' +
+      (archiveData.length === 0 ? 'No songs analyzed yet — cue one up above.' : 'No matches.') +
+      '</p>';
+    return;
+  }
+
+  list.innerHTML = filtered.map((s, i) => `
+    <button class="archive-item" onclick="showArchived(${archiveData.indexOf(s)})">
+      <span class="archive-song">${escapeHtml(s.song)}</span>
+      <span class="archive-artist">${escapeHtml(s.artist || '')}</span>
+    </button>
+  `).join('');
+}
+
+function showArchived(idx){
+  const song = archiveData[idx];
+  if (!song) return;
+  renderResult(song);
+  const anchor = document.getElementById('nowPlayingAnchor');
+  if (anchor) anchor.scrollIntoView({ behavior: 'smooth' });
 }
 
 async function analyzeSong(){
@@ -251,6 +357,7 @@ async function analyzeSong(){
     }
 
     renderResult(data);
+    archiveData = null; // a new song was just added — refresh the archive next time it's opened
     const anchor = document.getElementById('nowPlayingAnchor');
     if (anchor) anchor.scrollIntoView({ behavior: 'smooth' });
 
