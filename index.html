@@ -40,10 +40,7 @@
     margin: 0 auto 22px; display:flex; align-items:center; justify-content:center;
     text-align:center; transform: rotate(-6deg);
     box-shadow: 0 6px 0 -2px rgba(22,33,92,0.15); padding: 10px;
-    background-size: cover; background-position: center; overflow: hidden;
   }
-  .stamp.has-art{ padding: 0; }
-  .stamp.has-art span{ display:none; }
   .stamp span{
     font-family:'Space Mono', monospace; font-size: 9px;
     letter-spacing: 0.1em; text-transform: uppercase; line-height:1.55;
@@ -208,18 +205,6 @@ function escapeHtml(str){
   return d.innerHTML;
 }
 
-// Applies the album art the Worker already looked up server-side.
-// Falls back to the text stamp if none was found.
-function setStampArt(artworkUrl){
-  const stampBox = document.getElementById('stampBox');
-  stampBox.classList.remove('has-art');
-  stampBox.style.backgroundImage = '';
-
-  if (!artworkUrl) return;
-  stampBox.style.backgroundImage = `url("${artworkUrl}")`;
-  stampBox.classList.add('has-art');
-}
-
 async function analyzeSong(){
   const query = document.getElementById('cueInput').value.trim();
   const statusEl = document.getElementById('cueStatus');
@@ -236,8 +221,6 @@ async function analyzeSong(){
 
   btn.disabled = true;
   btn.textContent = 'Spinning...';
-  document.getElementById('stampBox').classList.remove('has-art');
-  document.getElementById('stampBox').style.backgroundImage = '';
   document.getElementById('stampText').innerHTML = 'Cue<br>Up<br>A<br>Song';
   document.getElementById('results').innerHTML = '<div class="state-box">Dropping the needle — researching and writing this one up...</div>';
 
@@ -262,12 +245,8 @@ async function analyzeSong(){
     }
 
     if (!res.ok || data.error){
-      let msg = data.error || ('Something went wrong (' + res.status + ').');
-      if (data.debug){
-        msg += '<br><br><span style="opacity:0.7">DEBUG (' + (data.stop_reason || 'no stop_reason') + '): ' + escapeHtml(data.debug) + '</span>';
-      }
       document.getElementById('results').innerHTML =
-        '<div class="state-box error">' + msg + '</div>';
+        '<div class="state-box error">' + escapeHtml(data.error || ('Something went wrong (' + res.status + ').')) + '</div>';
       return;
     }
 
@@ -287,7 +266,6 @@ async function analyzeSong(){
 function renderResult(d){
   const stampLines = [d.song, d.artist, d.album].filter(Boolean);
   document.getElementById('stampText').innerHTML = stampLines.map(escapeHtml).join('<br>');
-  setStampArt(d.artwork_url);
 
   const meta = [d.album, d.year].filter(Boolean).join(' · ');
   const recs = (d.recommendations || []).map((r, i) => `
