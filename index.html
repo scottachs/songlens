@@ -295,16 +295,21 @@ function renderArchiveList(){
     return;
   }
 
-  list.innerHTML = filtered.map((s, i) => `
-    <button class="archive-item" onclick="showArchived(${archiveData.indexOf(s)})">
-      <span class="archive-song">${escapeHtml(s.song)}</span>
-      <span class="archive-artist">${escapeHtml(s.artist || '')}</span>
-    </button>
-  `).join('');
+  // Build buttons and bind each to its own song object directly, so a click
+  // always resolves even if archiveData is later refreshed or cleared.
+  list.innerHTML = '';
+  filtered.forEach(song => {
+    const btn = document.createElement('button');
+    btn.className = 'archive-item';
+    btn.innerHTML =
+      '<span class="archive-song">' + escapeHtml(song.song) + '</span>' +
+      '<span class="archive-artist">' + escapeHtml(song.artist || '') + '</span>';
+    btn.addEventListener('click', () => showArchived(song));
+    list.appendChild(btn);
+  });
 }
 
-function showArchived(idx){
-  const song = archiveData[idx];
+function showArchived(song){
   if (!song) return;
   renderResult(song);
   const anchor = document.getElementById('nowPlayingAnchor');
@@ -357,7 +362,12 @@ async function analyzeSong(){
     }
 
     renderResult(data);
-    archiveData = null; // a new song was just added — refresh the archive next time it's opened
+    // A new song was just added. Drop the cached archive; if the panel is
+    // currently open, reload it now so the new song appears immediately.
+    archiveData = null;
+    if (document.getElementById('archivePanel').style.display !== 'none'){
+      loadArchive();
+    }
     const anchor = document.getElementById('nowPlayingAnchor');
     if (anchor) anchor.scrollIntoView({ behavior: 'smooth' });
 
