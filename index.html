@@ -87,7 +87,7 @@
     padding: 0 18px;
     cursor: pointer;
   }
-  .cue button:hover{ background: var(--ink-bright); }
+  .cue button:hover:not(:disabled){ background: var(--ink-bright); }
   .cue button:disabled{ opacity: 0.6; cursor: default; }
   .cue-status{
     font-family:'Space Mono', monospace;
@@ -215,8 +215,8 @@
 
   <div class="cue">
     <div class="cue-row">
-      <input type="text" id="cueInput" placeholder="Song — Artist" onkeydown="if(event.key==='Enter')analyzeSong()">
-      <button id="cueBtn" onclick="analyzeSong()">Cue Up</button>
+      <input type="text" id="cueInput" placeholder="Song — Artist" oninput="updateCueButton()" onkeydown="if(event.key==='Enter')analyzeSong()">
+      <button id="cueBtn" onclick="analyzeSong()" disabled>Cue Up</button>
     </div>
     <p class="cue-status" id="cueStatus"></p>
   </div>
@@ -316,6 +316,20 @@ function showArchived(song){
   if (anchor) anchor.scrollIntoView({ behavior: 'smooth' });
 }
 
+// The last query that produced a successful result. Used to keep the Cue Up
+// button disabled for that exact query, so re-clicking can't fire a second
+// (billed) analysis of a song that was just successfully analyzed.
+let lastSearchedQuery = null;
+
+// Enable Cue Up only when there's text AND it isn't the exact query we just
+// successfully analyzed. Empty box or a repeat of the last success -> disabled.
+function updateCueButton(){
+  const btn = document.getElementById('cueBtn');
+  if (btn.textContent === 'Spinning...') return; // mid-search; leave as-is
+  const val = document.getElementById('cueInput').value.trim();
+  btn.disabled = (val === '' || val === lastSearchedQuery);
+}
+
 async function analyzeSong(){
   const query = document.getElementById('cueInput').value.trim();
   const statusEl = document.getElementById('cueStatus');
@@ -324,9 +338,9 @@ async function analyzeSong(){
   statusEl.className = 'cue-status';
   statusEl.textContent = '';
 
-  if (!query){
-    statusEl.className = 'cue-status error';
-    statusEl.textContent = 'Type a song title (and artist, if you can).';
+  // Guard: ignore empty input and repeats of the last successful search
+  // (the Enter key can reach here even when the button itself is disabled).
+  if (!query || query === lastSearchedQuery){
     return;
   }
 
@@ -362,6 +376,9 @@ async function analyzeSong(){
     }
 
     renderResult(data);
+    // Remember this exact query as the last success, so the button stays
+    // disabled unless the visitor changes the text — no accidental re-charges.
+    lastSearchedQuery = query;
     // A new song was just added. Drop the cached archive; if the panel is
     // currently open, reload it now so the new song appears immediately.
     archiveData = null;
@@ -375,8 +392,8 @@ async function analyzeSong(){
     document.getElementById('results').innerHTML =
       '<div class="state-box error">Could not reach the analysis tool. Try again in a moment.</div>';
   } finally {
-    btn.disabled = false;
     btn.textContent = 'Cue Up';
+    updateCueButton();
   }
 }
 
