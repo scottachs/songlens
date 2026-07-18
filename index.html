@@ -412,6 +412,25 @@ function renderResult(d){
     </div>
   `).join('');
 
+  // Build the liner-note sections in order, skipping any that are empty.
+  // Skipping keeps things clean for archived analyses saved under an older
+  // format (which may lack "music", or may still carry the retired
+  // "moral_tension" field that we no longer display).
+  const sections = [
+    { title: 'The Setup', text: d.setup },
+    { title: 'The Characters', text: d.characters },
+    { title: 'The Psychology', text: d.psychology },
+    { title: 'The Music', text: d.music },
+    { title: 'Why It Stays With You', text: d.why_it_hits },
+  ].filter(s => s.text);
+
+  const tracks = sections.map((s, i) => `
+      <div class="track">
+        <div class="track-head"><span class="track-num">${String(i+1).padStart(2,'0')}</span><h3 class="track-title">${escapeHtml(s.title)}</h3></div>
+        <p>${escapeHtml(s.text)}</p>
+      </div>
+  `).join('');
+
   document.getElementById('results').innerHTML = `
     <div class="now-playing" id="nowPlayingAnchor">
       <p class="eyebrow">Now Playing</p>
@@ -421,26 +440,7 @@ function renderResult(d){
     </div>
 
     <div class="liner">
-      <div class="track">
-        <div class="track-head"><span class="track-num">01</span><h3 class="track-title">The Setup</h3></div>
-        <p>${escapeHtml(d.setup)}</p>
-      </div>
-      <div class="track">
-        <div class="track-head"><span class="track-num">02</span><h3 class="track-title">The Characters</h3></div>
-        <p>${escapeHtml(d.characters)}</p>
-      </div>
-      <div class="track">
-        <div class="track-head"><span class="track-num">03</span><h3 class="track-title">The Moral/Ethical Tension</h3></div>
-        <p>${escapeHtml(d.moral_tension)}</p>
-      </div>
-      <div class="track">
-        <div class="track-head"><span class="track-num">04</span><h3 class="track-title">The Psychology</h3></div>
-        <p>${escapeHtml(d.psychology)}</p>
-      </div>
-      <div class="track">
-        <div class="track-head"><span class="track-num">05</span><h3 class="track-title">Why It Hits</h3></div>
-        <p>${escapeHtml(d.why_it_hits)}</p>
-      </div>
+      ${tracks}
     </div>
 
     <div class="bside">
