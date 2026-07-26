@@ -13,6 +13,7 @@
     --cream: #fff2f8;
     --ink: #16215c;
     --ink-bright: #3247d1;
+    --gold: #e8a11c;
     --line: #d67aa8;
     --line-soft: #e6a9c6;
     --err: #a3123a;
@@ -34,24 +35,60 @@
 
   .sleeve{ width:100%; max-width: 620px; }
 
+  /* ---- Stamp (high-contrast, mode-aware) ---- */
   .stamp{
-    width: 128px; height: 128px; border-radius:50%;
-    border: 3px solid var(--ink); background: var(--cream);
-    margin: 0 auto 22px; display:flex; align-items:center; justify-content:center;
-    text-align:center; transform: rotate(-6deg);
-    box-shadow: 0 6px 0 -2px rgba(22,33,92,0.15); padding: 10px;
+    width: 150px; height: 150px; border-radius:50%;
+    margin: 0 auto 24px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+    padding: 14px; transform: rotate(-5deg);
+    background: var(--ink);
+    border: 4px solid var(--pop);
+    box-shadow: 0 0 0 4px var(--ink), 6px 8px 0 -1px rgba(22,33,92,0.28);
+    transition: transform 0.15s ease;
   }
-  .stamp span{
-    font-family:'Space Mono', monospace; font-size: 9px;
-    letter-spacing: 0.1em; text-transform: uppercase; line-height:1.55;
-    word-break: break-word;
+  .stamp:hover{ transform: rotate(-5deg) scale(1.03); }
+  .stamp-label{
+    font-family:'Space Mono', monospace; font-size: 9px; font-weight:700;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--ink); background: var(--pop);
+    padding: 2px 9px; border-radius: 20px; margin-bottom: 7px;
   }
+  .stamp-title{
+    font-family:'Instrument Serif', serif; font-style: italic; font-weight: 700;
+    font-size: 21px; line-height: 1.02; color: var(--cream);
+    word-break: break-word; max-height: 66px; overflow: hidden;
+  }
+  .stamp-artist{
+    font-family:'Work Sans', sans-serif; font-weight: 600; font-size: 11px;
+    letter-spacing: 0.02em; color: var(--pop); margin-top: 6px;
+    word-break: break-word; max-height: 30px; overflow: hidden;
+  }
+  /* Song = electric blue ring/accent; Album = warm gold ring/accent. */
+  .stamp.stamp--song{ --pop: var(--ink-bright); }
+  .stamp.stamp--album{ --pop: var(--gold); }
+  .stamp.stamp--idle{ --pop: var(--pink-panel); }
+  .stamp.stamp--idle .stamp-title{ color: var(--pink-panel); font-style: normal; }
+  .stamp.stamp--idle .stamp-label{ color: var(--ink); }
 
   header{ text-align:center; margin-bottom: 22px; }
   h1{
     font-family:'Instrument Serif', serif; font-style: normal; font-weight: 700;
     font-size: 44px; line-height:1.05; margin: 0; color: var(--ink);
   }
+
+  /* ---- Mode toggle ---- */
+  .mode-toggle{
+    display:flex; gap: 0; margin: 0 0 14px; border: 2px solid var(--ink);
+    border-radius: 10px; overflow: hidden; background: var(--cream);
+  }
+  .mode-toggle button{
+    flex: 1; font-family:'Space Mono', monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase; padding: 9px 0;
+    border: none; background: transparent; color: var(--ink); cursor: pointer;
+  }
+  .mode-toggle button + button{ border-left: 2px solid var(--ink); }
+  .mode-toggle button.active-song{ background: var(--ink-bright); color: var(--cream); }
+  .mode-toggle button.active-album{ background: var(--gold); color: var(--ink); }
 
   /* ---- Cue box ---- */
   .cue{
@@ -183,6 +220,13 @@
   }
   .archive-item:last-child{ border-bottom: none; }
   .archive-item:hover .archive-song{ color: var(--ink-bright); }
+  .archive-tag{
+    font-family:'Space Mono', monospace; font-size: 9px; font-weight:700;
+    letter-spacing: 0.08em; padding: 2px 6px; border-radius: 5px;
+    align-self: center; flex: none;
+  }
+  .archive-tag--song{ background: var(--ink-bright); color: var(--cream); }
+  .archive-tag--album{ background: var(--gold); color: var(--ink); }
   .archive-song{ font-family:'Instrument Serif', serif; font-style: italic; font-size: 18px; color: var(--ink); }
   .archive-artist{ font-family:'Work Sans', sans-serif; font-size: 13px; color: var(--ink); opacity: 0.7; }
   .archive-empty{
@@ -207,13 +251,21 @@
 
 <div class="sleeve">
 
-  <div class="stamp" id="stampBox"><span id="stampText">Cue<br>Up<br>A<br>Song</span></div>
+  <div class="stamp stamp--idle" id="stampBox">
+    <span class="stamp-label" id="stampLabel">Song Lens</span>
+    <span class="stamp-title" id="stampTitle">Cue Up</span>
+    <span class="stamp-artist" id="stampArtist">a song or album</span>
+  </div>
 
   <header>
-    <h1>Song Interpretations<br>and Recommendations</h1>
+    <h1>Song &amp; Album<br>Interpretations</h1>
   </header>
 
   <div class="cue">
+    <div class="mode-toggle" id="modeToggle">
+      <button type="button" id="modeSong" class="active-song" onclick="setMode('song')">Song</button>
+      <button type="button" id="modeAlbum" onclick="setMode('album')">Album</button>
+    </div>
     <div class="cue-row">
       <input type="text" id="cueInput" placeholder="Song — Artist" oninput="updateCueButton()" onkeydown="if(event.key==='Enter')analyzeSong()">
       <button id="cueBtn" onclick="analyzeSong()" disabled>Cue Up</button>
@@ -226,12 +278,12 @@
   </div>
 
   <div id="archivePanel" class="archive-panel" style="display:none;">
-    <input type="text" id="archiveFilter" class="archive-filter" placeholder="Filter by song or artist..." oninput="renderArchiveList()">
+    <input type="text" id="archiveFilter" class="archive-filter" placeholder="Filter by title or artist..." oninput="renderArchiveList()">
     <div id="archiveList"></div>
   </div>
 
   <div id="results">
-    <div class="state-box">Cue up a song above to get started.</div>
+    <div class="state-box">Cue up a song or album above to get started.</div>
   </div>
 
 </div>
@@ -244,6 +296,34 @@ function escapeHtml(str){
   const d = document.createElement('div');
   d.textContent = str;
   return d.innerHTML;
+}
+
+// ---- Mode: 'song' or 'album' -------------------------------------------
+let currentMode = 'song';
+
+function setMode(mode){
+  currentMode = mode;
+  const songBtn = document.getElementById('modeSong');
+  const albumBtn = document.getElementById('modeAlbum');
+  songBtn.classList.toggle('active-song', mode === 'song');
+  albumBtn.classList.toggle('active-album', mode === 'album');
+  document.getElementById('cueInput').placeholder =
+    mode === 'album' ? 'Album — Artist' : 'Song — Artist';
+  document.getElementById('cueBtn').textContent =
+    mode === 'album' ? 'Break It Down' : 'Cue Up';
+  // Switching mode should let the same text be searched fresh in the new mode.
+  lastSearchedKey = null;
+  updateCueButton();
+}
+
+// Set the top stamp. state = 'idle' | 'song' | 'album'.
+function setStamp(state, title, artist){
+  const box = document.getElementById('stampBox');
+  box.className = 'stamp stamp--' + state;
+  document.getElementById('stampLabel').textContent =
+    state === 'album' ? 'Album' : state === 'song' ? 'Song' : 'Song Lens';
+  document.getElementById('stampTitle').textContent = title;
+  document.getElementById('stampArtist').textContent = artist || '';
 }
 
 // ---- Archive of previously-analyzed songs ----
@@ -281,30 +361,36 @@ function renderArchiveList(){
   const list = document.getElementById('archiveList');
   if (!archiveData) return;
 
+  const titleOf = s => (s.mode === 'album' ? s.album : s.song) || s.album || s.song || '';
+
   const term = document.getElementById('archiveFilter').value.trim().toLowerCase();
   const filtered = term
     ? archiveData.filter(s =>
-        (s.song || '').toLowerCase().includes(term) ||
+        titleOf(s).toLowerCase().includes(term) ||
         (s.artist || '').toLowerCase().includes(term))
     : archiveData;
 
   if (filtered.length === 0){
     list.innerHTML = '<p class="archive-empty">' +
-      (archiveData.length === 0 ? 'No songs analyzed yet — cue one up above.' : 'No matches.') +
+      (archiveData.length === 0 ? 'Nothing analyzed yet — cue something up above.' : 'No matches.') +
       '</p>';
     return;
   }
 
-  // Build buttons and bind each to its own song object directly, so a click
-  // always resolves even if archiveData is later refreshed or cleared.
+  // Build buttons and bind each to its own object directly, so a click always
+  // resolves even if archiveData is later refreshed or cleared.
   list.innerHTML = '';
-  filtered.forEach(song => {
+  filtered.forEach(item => {
     const btn = document.createElement('button');
     btn.className = 'archive-item';
+    const tag = item.mode === 'album'
+      ? '<span class="archive-tag archive-tag--album">LP</span>'
+      : '<span class="archive-tag archive-tag--song">7&Prime;</span>';
     btn.innerHTML =
-      '<span class="archive-song">' + escapeHtml(song.song) + '</span>' +
-      '<span class="archive-artist">' + escapeHtml(song.artist || '') + '</span>';
-    btn.addEventListener('click', () => showArchived(song));
+      tag +
+      '<span class="archive-song">' + escapeHtml(titleOf(item)) + '</span>' +
+      '<span class="archive-artist">' + escapeHtml(item.artist || '') + '</span>';
+    btn.addEventListener('click', () => showArchived(item));
     list.appendChild(btn);
   });
 }
@@ -316,44 +402,57 @@ function showArchived(song){
   if (anchor) anchor.scrollIntoView({ behavior: 'smooth' });
 }
 
-// The last query that produced a successful result. Used to keep the Cue Up
-// button disabled for that exact query, so re-clicking can't fire a second
-// (billed) analysis of a song that was just successfully analyzed.
-let lastSearchedQuery = null;
+// The last query+mode that produced a successful result. Keeps the Cue Up
+// button disabled for that exact combo, so re-clicking can't fire a second
+// (billed) analysis of something just analyzed. Changing the text OR the mode
+// re-enables it.
+let lastSearchedKey = null;
 
-// Enable Cue Up only when there's text AND it isn't the exact query we just
-// successfully analyzed. Empty box or a repeat of the last success -> disabled.
+function currentKey(){
+  return currentMode + '::' + document.getElementById('cueInput').value.trim();
+}
+
+// Enable the button only when there's text AND it isn't the exact thing we
+// just successfully analyzed in this mode. Empty box or a repeat -> disabled.
 function updateCueButton(){
   const btn = document.getElementById('cueBtn');
-  if (btn.textContent === 'Spinning...') return; // mid-search; leave as-is
+  if (btn.dataset.busy === '1') return; // mid-search; leave as-is
   const val = document.getElementById('cueInput').value.trim();
-  btn.disabled = (val === '' || val === lastSearchedQuery);
+  btn.disabled = (val === '' || currentKey() === lastSearchedKey);
 }
 
 async function analyzeSong(){
   const query = document.getElementById('cueInput').value.trim();
+  const mode = currentMode;
   const statusEl = document.getElementById('cueStatus');
   const btn = document.getElementById('cueBtn');
+  const idleLabel = mode === 'album' ? 'Break It Down' : 'Cue Up';
 
   statusEl.className = 'cue-status';
   statusEl.textContent = '';
 
   // Guard: ignore empty input and repeats of the last successful search
   // (the Enter key can reach here even when the button itself is disabled).
-  if (!query || query === lastSearchedQuery){
+  if (!query || currentKey() === lastSearchedKey){
     return;
   }
 
   btn.disabled = true;
+  btn.dataset.busy = '1';
   btn.textContent = 'Spinning...';
-  document.getElementById('stampText').innerHTML = 'Cue<br>Up<br>A<br>Song';
-  document.getElementById('results').innerHTML = '<div class="state-box">Dropping the needle — researching and writing this one up...</div>';
+  setStamp('idle', 'Spinning', mode === 'album' ? 'reading the record' : 'reading the room');
+  document.getElementById('results').innerHTML =
+    '<div class="state-box">' +
+    (mode === 'album'
+      ? 'Pulling the record — reading it front to back...'
+      : 'Dropping the needle — researching and writing this one up...') +
+    '</div>';
 
   const attempt = async () => {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
+      body: JSON.stringify({ query, mode })
     });
     const data = await res.json();
     return { res, data };
@@ -364,23 +463,24 @@ async function analyzeSong(){
     try {
       ({ res, data } = await attempt());
     } catch (firstErr) {
-      // Transient network hiccups happen with slower searches — retry once, silently.
+      // Transient network hiccups happen — retry once, silently.
       document.getElementById('results').innerHTML = '<div class="state-box">Still working on it — trying once more...</div>';
       ({ res, data } = await attempt());
     }
 
     if (!res.ok || data.error){
+      setStamp('idle', 'Cue Up', 'a song or album');
       document.getElementById('results').innerHTML =
         '<div class="state-box error">' + escapeHtml(data.error || ('Something went wrong (' + res.status + ').')) + '</div>';
       return;
     }
 
     renderResult(data);
-    // Remember this exact query as the last success, so the button stays
-    // disabled unless the visitor changes the text — no accidental re-charges.
-    lastSearchedQuery = query;
-    // A new song was just added. Drop the cached archive; if the panel is
-    // currently open, reload it now so the new song appears immediately.
+    // Remember this exact query+mode as the last success, so the button stays
+    // disabled unless the visitor changes the text or the mode.
+    lastSearchedKey = mode + '::' + query;
+    // Something new was just added. Drop the cached archive; if the panel is
+    // open, reload it now so the new entry appears immediately.
     archiveData = null;
     if (document.getElementById('archivePanel').style.display !== 'none'){
       loadArchive();
@@ -389,19 +489,33 @@ async function analyzeSong(){
     if (anchor) anchor.scrollIntoView({ behavior: 'smooth' });
 
   } catch(e){
+    setStamp('idle', 'Cue Up', 'a song or album');
     document.getElementById('results').innerHTML =
       '<div class="state-box error">Could not reach the analysis tool. Try again in a moment.</div>';
   } finally {
-    btn.textContent = 'Cue Up';
+    btn.dataset.busy = '';
+    btn.textContent = idleLabel;
     updateCueButton();
   }
 }
 
 function renderResult(d){
-  const stampLines = [d.song, d.artist, d.album].filter(Boolean);
-  document.getElementById('stampText').innerHTML = stampLines.map(escapeHtml).join('<br>');
+  const isAlbum = (d.mode === 'album') || (!d.song && !!d.album && (d.premise || d.arc || d.threads || d.sound || d.why_it_lasts));
 
-  const meta = [d.album, d.year].filter(Boolean).join(' · ');
+  // Top stamp: album shows album+artist; song shows song+artist.
+  const stampTitle = isAlbum ? d.album : d.song;
+  setStamp(isAlbum ? 'album' : 'song', stampTitle || '', d.artist || '');
+
+  // Now-playing header + meta line.
+  const nowTitle = isAlbum ? d.album : d.song;
+  const meta = isAlbum
+    ? (d.year || '')
+    : [d.album, d.year].filter(Boolean).join(' · ');
+  const eyebrow = isAlbum ? 'Now Spinning' : 'Now Playing';
+
+  const recLabel = isAlbum
+    ? 'B-Side — Albums to Play Next'
+    : 'B-Side — Recommended Next Spins';
   const recs = (d.recommendations || []).map((r, i) => `
     <div class="rec">
       <span class="rec-num">${i+1}</span>
@@ -412,17 +526,23 @@ function renderResult(d){
     </div>
   `).join('');
 
-  // Build the liner-note sections in order, skipping any that are empty.
-  // Skipping keeps things clean for archived analyses saved under an older
-  // format (which may lack "music", or may still carry the retired
-  // "moral_tension" field that we no longer display).
-  const sections = [
-    { title: 'The Setup', text: d.setup },
-    { title: 'The Characters', text: d.characters },
-    { title: 'The Psychology', text: d.psychology },
-    { title: 'The Music', text: d.music },
-    { title: 'Why It Stays With You', text: d.why_it_hits },
-  ].filter(s => s.text);
+  // Section set differs by mode. Empty sections are skipped, which also keeps
+  // older archived entries (saved under a previous format) rendering cleanly.
+  const sections = isAlbum
+    ? [
+        { title: 'The Premise', text: d.premise },
+        { title: 'The Arc', text: d.arc },
+        { title: 'The Threads', text: d.threads },
+        { title: 'The Sound', text: d.sound },
+        { title: 'Why It Lasts', text: d.why_it_lasts },
+      ].filter(s => s.text)
+    : [
+        { title: 'The Setup', text: d.setup },
+        { title: 'The Characters', text: d.characters },
+        { title: 'The Psychology', text: d.psychology },
+        { title: 'The Music', text: d.music },
+        { title: 'Why It Stays With You', text: d.why_it_hits },
+      ].filter(s => s.text);
 
   const tracks = sections.map((s, i) => `
       <div class="track">
@@ -433,9 +553,9 @@ function renderResult(d){
 
   document.getElementById('results').innerHTML = `
     <div class="now-playing" id="nowPlayingAnchor">
-      <p class="eyebrow">Now Playing</p>
-      <h2 class="title">${escapeHtml(d.song)}</h2>
-      <p class="artist">${escapeHtml(d.artist)}</p>
+      <p class="eyebrow">${eyebrow}</p>
+      <h2 class="title">${escapeHtml(nowTitle)}</h2>
+      <p class="artist">${escapeHtml(d.artist || '')}</p>
       ${meta ? `<p class="album">${escapeHtml(meta)}</p>` : ''}
     </div>
 
@@ -444,7 +564,7 @@ function renderResult(d){
     </div>
 
     <div class="bside">
-      <p class="bside-head">B-Side — Recommended Next Spins</p>
+      <p class="bside-head">${recLabel}</p>
       ${recs}
     </div>
   `;
